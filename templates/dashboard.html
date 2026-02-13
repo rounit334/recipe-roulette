@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Recipe Roulette</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 25%, #f093fb 50%, #f5576c 75%, #ffa949 100%);
+            background-size: 400% 400%;
+            animation: gradientShift 15s ease infinite;
+        }
+        
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        
+        .glass-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+        
+        .stat-card {
+            transition: all 0.3s ease;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+    </style>
+</head>
+<body class="min-h-screen">
+    
+    <!-- Navbar -->
+    <nav class="glass-card shadow-lg mb-8">
+        <div class="container mx-auto px-4 py-4 flex justify-between items-center">
+            <div class="flex items-center gap-3">
+                <span class="text-4xl">🍳</span>
+                <h1 class="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-red-500">Recipe Roulette</h1>
+            </div>
+            <div class="flex items-center gap-4">
+                <a href="/" class="text-gray-800 font-bold text-lg hover:text-orange-600 transition">Home</a>
+                <a href="/dashboard" class="text-orange-600 font-bold text-lg border-b-2 border-orange-600">Dashboard</a>
+                <a href="/logout" class="bg-gradient-to-r from-red-500 to-orange-500 hover:from-red-600 hover:to-orange-600 text-white px-6 py-3 rounded-xl font-bold transition shadow-lg hover:shadow-xl">Logout</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mx-auto px-4 pb-12">
+        
+        <!-- Welcome Section -->
+        <div class="glass-card rounded-2xl shadow-2xl p-8 mb-8">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center gap-6">
+                    <!-- Profile Picture -->
+                    <div class="relative group">
+                        <img src="https://ui-avatars.com/api/?name={{ username }}&size=120&background=FF6B35&color=fff&bold=true" 
+                             alt="Profile" 
+                             class="w-32 h-32 rounded-full border-4 border-orange-500 shadow-lg">
+                        <button class="absolute bottom-0 right-0 bg-orange-500 hover:bg-orange-600 text-white p-2 rounded-full shadow-lg opacity-0 group-hover:opacity-100 transition">
+                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                                <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z"/>
+                            </svg>
+                        </button>
+                    </div>
+                    
+                    <!-- User Info -->
+                    <div>
+                        <h2 class="text-4xl font-black text-gray-800 mb-2">Welcome back, {{ username }}! 👋</h2>
+                        <p class="text-gray-600 text-lg font-semibold">{{ email }}</p>
+                    </div>
+                </div>
+                
+                <!-- Edit Profile Button -->
+                <button onclick="openEditModal()" class="bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white px-6 py-3 rounded-xl font-bold transition shadow-lg hover:shadow-xl flex items-center gap-2">
+                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z"/>
+                    </svg>
+                    Edit Profile
+                </button>
+            </div>
+        </div>
+
+        <!-- Statistics Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+            
+            <!-- Total Searches -->
+            <div class="glass-card rounded-2xl p-6 stat-card">
+                <div class="flex items-center justify-between mb-4">
+                    <div class="bg-blue-100 p-3 rounded-xl">
+                        <svg class="w-8 h-8 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
+                            <path d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z"/>
+                        </svg>
+                    </div>
+                </div>
+                <h3 class="text-gray-600 font-bold text-sm mb-1">Total Searches</h3>
+                <p class="text-4xl font-black text-gray-800">{{ total_searches }}</p>
+            </div>
+
+            <!-- Recipes Found -->
+            <div class="glass-card rounded-2xl p-6 stat-card">
+                <div class="flex items-center justify-between mb-4">
+                    <div class="bg-green-100 p-3 rounded-xl">
+                        <svg class="w-8 h-8 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+                            <path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z"/>
+                            <path fill-rule="evenodd" d="M4 5a2 2 0 012-2 3 3 0 003 3h2a3 3 0 003-3 2 2 0 012 2v11a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm3 4a1 1 0 000 2h.01a1 1 0 100-2H7zm3 0a1 1 0 000 2h3a1 1 0 100-2h-3zm-3 4a1 1 0 100 2h.01a1 1 0 100-2H7zm3 0a1 1 0 100 2h3a1 1 0 100-2h-3z"/>
+                        </svg>
+                    </div>
+                </div>
+                <h3 class="text-gray-600 font-bold text-sm mb-1">Recipes Found</h3>
+                <p class="text-4xl font-black text-gray-800">{{ recipes_found }}</p>
+            </div>
+
+            <!-- Shopping List Items -->
+            <div class="glass-card rounded-2xl p-6 stat-card">
+                <div class="flex items-center justify-between mb-4">
+                    <div class="bg-orange-100 p-3 rounded-xl">
+                        <svg class="w-8 h-8 text-orange-600" fill="currentColor" viewBox="0 0 20 20">
+                            <path d="M3 1a1 1 0 000 2h1.22l.305 1.222a.997.997 0 00.01.042l1.358 5.43-.893.892C3.74 11.846 4.632 14 6.414 14H15a1 1 0 000-2H6.414l1-1H14a1 1 0 00.894-.553l3-6A1 1 0 0017 3H6.28l-.31-1.243A1 1 0 005 1H3zM16 16.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0zM6.5 18a1.5 1.5 0 100-3 1.5 1.5 0 000 3z"/>
+                        </svg>
+                    </div>
+                </div>
+                <h3 class="text-gray-600 font-bold text-sm mb-1">Shopping Items</h3>
+                <p class="text-4xl font-black text-gray-800">{{ shopping_items }}</p>
+            </div>
+
+            <!-- Ingredients Used -->
+            <div class="glass-card rounded-2xl p-6 stat-card">
+                <div class="flex items-center justify-between mb-4">
+                    <div class="bg-purple-100 p-3 rounded-xl">
+                        <svg class="w-8 h-8 text-purple-600" fill="currentColor" viewBox="0 0 20 20">
+                            <path d="M8.433 7.418c.155-.103.346-.196.567-.267v1.698a2.305 2.305 0 01-.567-.267C8.07 8.34 8 8.114 8 8c0-.114.07-.34.433-.582zM11 12.849v-1.698c.22.071.412.164.567.267.364.243.433.468.433.582 0 .114-.07.34-.433.582a2.305 2.305 0 01-.567.267z"/>
+                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-13a1 1 0 10-2 0v.092a4.535 4.535 0 00-1.676.662C6.602 6.234 6 7.009 6 8c0 .99.602 1.765 1.324 2.246.48.32 1.054.545 1.676.662v1.941c-.391-.127-.68-.317-.843-.504a1 1 0 10-1.51 1.31c.562.649 1.413 1.076 2.353 1.253V15a1 1 0 102 0v-.092a4.535 4.535 0 001.676-.662C13.398 13.766 14 12.991 14 12c0-.99-.602-1.765-1.324-2.246A4.535 4.535 0 0011 9.092V7.151c.391.127.68.317.843.504a1 1 0 101.511-1.31c-.563-.649-1.413-1.076-2.354-1.253V5z"/>
+                        </svg>
+                    </div>
+                </div>
+                <h3 class="text-gray-600 font-bold text-sm mb-1">Monthly Budget</h3>
+                <p class="text-4xl font-black text-gray-800">₹{{ budget_spent }}</p>
+                <p class="text-green-600 text-sm font-bold mt-2">₹{{ budget_remaining }} remaining!</p>
+            </div>
+        </div>
+
+        <!-- Recent Activity & Quick Actions -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
+            
+            <!-- Budget Tracker (New Column) -->
+            <div class="glass-card rounded-2xl p-8">
+                <h3 class="text-2xl font-black text-gray-800 mb-6 flex items-center gap-2">
+                    <svg class="w-6 h-6 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M8.433 7.418c.155-.103.346-.196.567-.267v1.698a2.305 2.305 0 01-.567-.267C8.07 8.34 8 8.114 8 8c0-.114.07-.34.433-.582zM11 12.849v-1.698c.22.071.412.164.567.267.364.243.433.468.433.582 0 .114-.07.34-.433.582a2.305 2.305 0 01-.567.267z"/>
+                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-13a1 1 0 10-2 0v.092a4.535 4.535 0 00-1.676.662C6.602 6.234 6 7.009 6 8c0 .99.602 1.765 1.324 2.246.48.32 1.054.545 1.676.662v1.941c-.391-.127-.68-.317-.843-.504a1 1 0 10-1.51 1.31c.562.649 1.413 1.076 2.353 1.253V15a1 1 0 102 0v-.092a4.535 4.535 0 001.676-.662C13.398 13.766 14 12.991 14 12c0-.99-.602-1.765-1.324-2.246A4.535 4.535 0 0011 9.092V7.151c.391.127.68.317.843.504a1 1 0 101.511-1.31c-.563-.649-1.413-1.076-2.354-1.253V5z"/>
+                    </svg>
+                    Monthly Budget
+                </h3>
+
+                <!-- Budget Progress Bar -->
+                <div class="mb-6">
+                    <div class="flex justify-between items-center mb-2">
+                        <span class="text-sm font-bold text-gray-600">Spent</span>
+                        <span class="text-sm font-bold text-gray-800">₹{{ budget_spent }} / ₹{{ monthly_budget }}</span>
+                    </div>
+                    <div class="w-full bg-gray-200 rounded-full h-4 overflow-hidden">
+                        <div class="bg-gradient-to-r from-green-500 to-emerald-500 h-4 rounded-full" style="width: 78%"></div>>
+                    </div>
+                    <p class="text-xs text-gray-500 mt-1">₹{{ budget_remaining }} remaining ({{ 100 - budget_percentage }}%)</p>
+                </div>
+
+                <!-- This Month Breakdown -->
+                <div class="space-y-3">
+                    <h4 class="font-black text-gray-800 text-sm">This Month:</h4>
+                    
+                    <div class="flex justify-between items-center p-3 bg-green-50 rounded-xl">
+                        <div class="flex items-center gap-2">
+                            <div class="w-2 h-2 bg-green-500 rounded-full"></div>
+                            <span class="text-sm font-bold text-gray-700">Groceries</span>
+                        </div>
+                        <span class="font-black text-gray-800">₹1,850</span>
+                    </div>
+
+                    <div class="flex justify-between items-center p-3 bg-orange-50 rounded-xl">
+                        <div class="flex items-center gap-2">
+                            <div class="w-2 h-2 bg-orange-500 rounded-full"></div>
+                            <span class="text-sm font-bold text-gray-700">Shopping List</span>
+                        </div>
+                        <span class="font-black text-gray-800">₹490</span>
+                    </div>
+
+                    <div class="flex justify-between items-center p-3 bg-blue-50 rounded-xl">
+                        <div class="flex items-center gap-2">
+                            <div class="w-2 h-2 bg-blue-500 rounded-full"></div>
+                            <span class="text-sm font-bold text-gray-700">Total Saved</span>
+                        </div>
+                        <span class="font-black text-green-600">₹660</span>
+                    </div>
+                </div>
+
+                <!-- Set Budget Button -->
+                <button onclick="openBudgetModal()" class="w-full mt-6 bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white py-3 rounded-xl font-bold transition shadow-lg">
+                    Update Budget
+                </button>
+            </div>
+            
+            <!-- Recent Activity -->
+            <div class="glass-card rounded-2xl p-8">
+                <h3 class="text-2xl font-black text-gray-800 mb-6 flex items-center gap-2">
+                    <svg class="w-6 h-6 text-orange-500" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z"/>
+                    </svg>
+                    Recent Activity
+                </h3>
+                
+                <div class="space-y-4">
+                     {% if recent_activities %}
+                          {% for activity in recent_activities %}
+                        <div class="flex items-start gap-4 p-4 bg-white/50 rounded-xl hover:bg-white/70 transition">
+                            <div class="{% if activity.activity_type == 'search' %}bg-green-100{% else %}bg-orange-100{% endif %} p-2 rounded-lg">
+                                <svg class="w-5 h-5 {% if activity.activity_type == 'search' %}text-green-600{% else %}text-orange-600{% endif %}" fill="currentColor" viewBox="0 0 20 20">
+                                    {% if activity.activity_type == 'search' %}
+                                    <path d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z"/>
+                                    {% else %}
+                                    <path d="M3 1a1 1 0 000 2h1.22l.305 1.222a.997.997 0 00.01.042l1.358 5.43-.893.892C3.74 11.846 4.632 14 6.414 14H15a1 1 0 000-2H6.414l1-1H14a1 1 0 00.894-.553l3-6A1 1 0 0017 3H6.28l-.31-1.243A1 1 0 005 1H3z"/>
+                                    {% endif %}
+                                </svg>
+                            </div>
+                            <div class="flex-1">
+                                <p class="font-bold text-gray-800">
+                                    {% if activity.activity_type == 'search' %}Searched for recipes{% else %}Added to shopping list{% endif %}
+                                </p>
+                                <p class="text-sm text-gray-600">{{ activity.activity_details }}</p>
+                                 <p class="text-xs text-gray-500 mt-1">{{ activity.activity_date.strftime('%B %d, %Y at %I:%M %p') }}</p>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <p class="text-gray-500 italic text-center">No recent activity</p>
+                    {% endif %}
+                    </div>
+                
+                </div>
+
+            <!-- Quick Actions & Shopping List Preview -->
+            <div class="space-y-6 lg:col-span-1">
+                
+                <!-- Quick Actions -->
+                <div class="glass-card rounded-2xl p-8">
+                    <h3 class="text-2xl font-black text-gray-800 mb-6">Quick Actions</h3>
+                    
+                    <div class="grid grid-cols-2 gap-4">
+                        <a href="/" class="bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white p-4 rounded-xl font-bold transition shadow-lg hover:shadow-xl flex flex-col items-center gap-2">
+                            <svg class="w-8 h-8" fill="currentColor" viewBox="0 0 20 20">
+                                <path d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z"/>
+                            </svg>
+                            Search Recipes
+                        </a>
+
+                        <a href="#shopping-list-section" class="bg-white hover:bg-gray-50 border-2 border-orange-500 text-orange-500 p-4 rounded-xl font-bold transition shadow-lg hover:shadow-xl flex flex-col items-center gap-2">
+                             <svg class="w-8 h-8" fill="currentColor" viewBox="0 0 20 20">
+                                    <path d="M3 1a1 1 0 000 2h1.22l.305 1.222a.997.997 0 00.01.042l1.358 5.43-.893.892C3.74 11.846 4.632 14 6.414 14H15a1 1 0 000-2H6.414l1-1H14a1 1 0 00.894-.553l3-6A1 1 0 0017 3H6.28l-.31-1.243A1 1 0 005 1H3z"/>
+                             </svg>
+                             Shopping List
+                        </a>
+
+                        <button onclick="alert('Search History feature coming soon!')" class="bg-white hover:bg-gray-50 border-2 border-purple-500 text-purple-500 p-4 rounded-xl font-bold transition shadow-lg hover:shadow-xl flex flex-col items-center gap-2">
+                            <svg class="w-8 h-8" fill="currentColor" viewBox="0 0 20 20">
+                                <path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z"/>
+                                <path fill-rule="evenodd" d="M4 5a2 2 0 012-2 3 3 0 003 3h2a3 3 0 003-3 2 2 0 012 2v11a2 2 0 01-2 2H6a2 2 0 01-2-2V5z"/>
+                            </svg>
+                            Search History
+                        </button>
+
+                        <button onclick="openEditModal()" class="bg-white hover:bg-gray-50 border-2 border-blue-500 text-blue-500 p-4 rounded-xl font-bold transition shadow-lg hover:shadow-xl flex flex-col items-center gap-2">
+                            <svg class="w-8 h-8" fill="currentColor" viewBox="0 0 20 20">
+                                <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z"/>
+                            </svg>
+                            Edit Profile
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Shopping List Preview with Cost -->
+                <div class="glass-card rounded-2xl p-8" id="shopping-list-section">
+                         <div class="flex justify-between items-center mb-6">
+                            <h3 class="text-2xl font-black text-gray-800">Shopping List</h3>
+                        <div class="flex items-center gap-2">
+                            <span class="bg-orange-500 text-white px-3 py-1 rounded-full text-sm font-bold">5 items</span>
+                            
+                        </div>
+                    </div>
+                    
+                    <div class="space-y-3" id="shoppingListPreview">
+                        <!-- Items will be loaded here -->
+                    </div>
+                    <button class="w-full mt-4 bg-orange-500 hover:bg-orange-600 text-white py-3 rounded-xl font-bold transition">
+                        View Full List
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Profile Modal -->
+    <div id="editModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+        <div class="glass-card rounded-2xl p-8 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-3xl font-black text-gray-800">Edit Profile</h2>
+                <button onclick="closeEditModal()" class="text-gray-500 hover:text-gray-700 text-2xl font-bold">×</button>
+            </div>
+
+            <form class="space-y-6">
+                <!-- Profile Picture Upload -->
+                <div>
+                    <label class="block text-gray-700 font-bold mb-3">Profile Picture</label>
+                    <div class="flex items-center gap-6">
+                        <img src="https://ui-avatars.com/api/?name={{ username }}&size=100&background=FF6B35&color=fff&bold=true" 
+                             alt="Profile" 
+                             class="w-24 h-24 rounded-full border-4 border-orange-500">
+                        <div>
+                            <button type="button" class="bg-orange-500 hover:bg-orange-600 text-white px-6 py-3 rounded-xl font-bold transition mb-2">
+                                Upload New Picture
+                            </button>
+                            <p class="text-sm text-gray-500">JPG, PNG or GIF. Max size 2MB.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Username -->
+                <div>
+                    <label class="block text-gray-700 font-bold mb-2">Username</label>
+                    <input type="text" value="{{ username }}" class="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:border-orange-500 focus:outline-none font-semibold">
+                </div>
+
+                <!-- Email -->
+                <div>
+                    <label class="block text-gray-700 font-bold mb-2">Email</label>
+                    <input type="email" value="{{ email }}" class="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:border-orange-500 focus:outline-none font-semibold">
+                </div>
+
+                <!-- Phone (Optional) -->
+                <div>
+                    <label class="block text-gray-700 font-bold mb-2">Phone Number (Optional)</label>
+                    <input type="tel" placeholder="+91 1234567890" class="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:border-orange-500 focus:outline-none font-semibold">
+                </div>
+
+                <!-- Location (Optional) -->
+                <div>
+                    <label class="block text-gray-700 font-bold mb-2">Location (Optional)</label>
+                    <input type="text" placeholder="Jaipur, Rajasthan" class="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:border-orange-500 focus:outline-none font-semibold">
+                </div>
+
+                <!-- Change Password Section -->
+                <div class="border-t-2 border-gray-200 pt-6">
+                    <h3 class="text-xl font-black text-gray-800 mb-4">Change Password</h3>
+                    
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-gray-700 font-bold mb-2">Current Password</label>
+                            <input type="password" class="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:border-orange-500 focus:outline-none font-semibold">
+                        </div>
+
+                        <div>
+                            <label class="block text-gray-700 font-bold mb-2">New Password</label>
+                            <input type="password" class="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:border-orange-500 focus:outline-none font-semibold">
+                        </div>
+
+                        <div>
+                            <label class="block text-gray-700 font-bold mb-2">Confirm New Password</label>
+                            <input type="password" class="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:border-orange-500 focus:outline-none font-semibold">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="flex gap-4 pt-4">
+                    <button type="submit" class="flex-1 bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white py-4 rounded-xl font-black text-lg transition shadow-lg hover:shadow-xl">
+                        Save Changes
+                    </button>
+                    <button type="button" onclick="closeEditModal()" class="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 py-4 rounded-xl font-black text-lg transition">
+                        Cancel
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+                <!-- Update Budget Modal -->
+                <div id="budgetModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+                    <div class="glass-card rounded-2xl p-8 max-w-md w-full">
+                        <div class="flex justify-between items-center mb-6">
+                            <h2 class="text-3xl font-black text-gray-800">Update Monthly Budget</h2>
+                            <button onclick="closeBudgetModal()" class="text-gray-500 hover:text-gray-700 text-2xl font-bold">×</button>
+                        </div>
+
+                        <form onsubmit="updateBudget(event)" class="space-y-6">
+                             <div>
+                                <label class="block text-gray-700 font-bold mb-2">Monthly Budget (₹)</label>
+                                 <input 
+                                    type="number" 
+                                    id="budgetAmount"
+                                    min="0"
+                                    step="0.01"
+                                    value="{{ monthly_budget }}"
+                                    class="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:border-orange-500 focus:outline-none font-semibold text-lg"
+                                    placeholder="3000.00"
+                                    required
+                                >
+                             </div>
+
+                            <div class="flex gap-4">
+                                 <button 
+                                      type="submit"
+                                    class="flex-1 bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white py-4 rounded-xl font-black text-lg transition shadow-lg hover:shadow-xl">
+                                    Save Budget
+                                </button>
+                                <button 
+                                    type="button"
+                                    onclick="closeBudgetModal()"
+                                    class="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 py-4 rounded-xl font-black text-lg transition">
+                                    Cancel
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+    <script>
+        function openEditModal() {
+            document.getElementById('editModal').classList.remove('hidden');
+        }
+
+        function closeEditModal() {
+            document.getElementById('editModal').classList.add('hidden');
+        }
+
+        // Close modal when clicking outside
+        document.getElementById('editModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeEditModal();
+            }
+        });
+
+            // Load shopping list from database
+    async function loadShoppingList() {
+        try {
+            const response = await fetch('/get-shopping-list');
+            const items = await response.json();
+            
+            // Update the shopping list preview section
+           const previewContainer = document.getElementById('shoppingListPreview');
+            
+            if (!previewContainer) return;
+            
+            if (items.length === 0) {
+                previewContainer.innerHTML = '<p class="text-gray-500 italic text-center">No items in shopping list</p>';
+            } else {
+                // Show first 3 items
+                const displayItems = items.slice(0, 3);
+                previewContainer.innerHTML = displayItems.map(item => `
+                    <div class="flex items-center justify-between p-3 bg-white/50 rounded-xl">
+                        <div>
+                            <span class="font-bold text-gray-800 block">${item.ingredient_name}</span>
+                        </div>
+                        <button onclick="markPurchased(${item.id})" class="text-green-600 hover:text-green-800 font-bold">✓</button>
+                    </div>
+                `).join('');
+                
+                // Update the count badge
+                document.querySelector('.bg-orange-500.text-white.px-3.py-1.rounded-full').textContent = `${items.length} items`;
+            }
+        } catch (error) {
+            console.error('Error loading shopping list:', error);
+        }
+    }
+
+    // Mark item as purchased
+    async function markPurchased(id) {
+        try {
+            const response = await fetch('/mark-purchased', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ id: id })
+            });
+            
+            if (response.ok) {
+                loadShoppingList(); // Reload the list
+            }
+        } catch (error) {
+            console.error('Error marking as purchased:', error);
+        }
+    }
+
+    // Load shopping list when page loads
+    window.addEventListener('DOMContentLoaded', loadShoppingList);
+    
+    // Budget Modal Functions
+    function openBudgetModal() {
+        document.getElementById('budgetModal').classList.remove('hidden');
+    }
+
+    function closeBudgetModal() {
+        document.getElementById('budgetModal').classList.add('hidden');
+    }
+
+    // Update budget
+    async function updateBudget(event) {
+        event.preventDefault();
+        
+        const budgetAmount = document.getElementById('budgetAmount').value;
+        
+        try {
+            const response = await fetch('/update-budget', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ budget: budgetAmount })
+            });
+            
+            const result = await response.json();
+            
+            if (response.ok) {
+                alert('Budget updated successfully!');
+                closeBudgetModal();
+                location.reload(); // Reload to show new budget
+            } else {
+                alert('Error: ' + result.error);
+            }
+        } catch (error) {
+            alert('Error updating budget: ' + error.message);
+        }
+    }
+
+    </script>
+
+</body>
+</html>
